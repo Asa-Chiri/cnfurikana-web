@@ -24,7 +24,7 @@ export function ToParsedContent(texts) {
       .filter(
         (v) => v !== "\n" && v !== "\r\n" && v !== "" && v !== "undefined"
       ) || [];
-  const arrowTones = ["&nbsp;", "→", "↗", "↘↗", "↘", "·"];
+  const arrowTones = ["\u00a0", "→", "↗", "↘↗", "↘", "·"];
   // let hanziContent = getChinese(text);
   let retContents = [];
   for (let t = 0; t < texts.length; t++) {
@@ -50,7 +50,7 @@ export function ToParsedContent(texts) {
         });
         j++;
       } else {
-        let space = "&nbsp;".repeat(tonePinyin.length + 1);
+        let space = "\u00a0".repeat(tonePinyin.length + 1);
         retContent.push({
           hanzi: tonePinyin,
           isHanzi: false,
@@ -69,6 +69,15 @@ export function ToParsedContent(texts) {
   return retContents;
 }
 
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function ToHtmlContent(parsedContents, displayMode = 0) {
   // displayMode:
   // 0 标注片假名和箭头音调
@@ -81,16 +90,16 @@ export function ToHtmlContent(parsedContents, displayMode = 0) {
     let retContent = [];
     for (let i = 0; i < parsedContent.length; i++) {
       let parsedHanzi = parsedContent[i];
-      let content = parsedHanzi.hanzi;
+      let content = escapeHtml(parsedHanzi.hanzi);
       switch (displayMode) {
         case 0:
           content =
             "<ruby>&nbsp;" +
             content +
             "&nbsp;<rp>(</rp><rt>&nbsp;" +
-            parsedHanzi.funikana +
+            escapeHtml(parsedHanzi.funikana) +
             "&nbsp;</rt><rp>)</rp></ruby><rp>(</rp><rt>&nbsp;" +
-            parsedHanzi.arrowTone +
+            escapeHtml(parsedHanzi.arrowTone) +
             "&nbsp;</rt><rp>)</rp>";
           break;
         case 1:
@@ -98,7 +107,7 @@ export function ToHtmlContent(parsedContents, displayMode = 0) {
             "&nbsp;" +
             content +
             "&nbsp;<rp>(</rp><rt>&nbsp;" +
-            parsedHanzi.funikana +
+            escapeHtml(parsedHanzi.funikana) +
             "&nbsp;</rt><rp>)</rp>";
           break;
         case 2:
@@ -106,7 +115,7 @@ export function ToHtmlContent(parsedContents, displayMode = 0) {
             "&nbsp;" +
             content +
             "&nbsp;<rp>(</rp><rt>&nbsp;" +
-            parsedHanzi.tonePinyin +
+            escapeHtml(parsedHanzi.tonePinyin) +
             "&nbsp;</rt><rp>)</rp>";
           break;
         case 3:
@@ -114,7 +123,7 @@ export function ToHtmlContent(parsedContents, displayMode = 0) {
             "&nbsp;" +
             content +
             "&nbsp;<rp>(</rp><rt>&nbsp;" +
-            parsedHanzi.untonePinyin +
+            escapeHtml(parsedHanzi.untonePinyin) +
             "&nbsp;</rt><rp>)</rp>";
           break;
         default:
