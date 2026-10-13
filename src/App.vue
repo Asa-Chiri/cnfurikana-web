@@ -105,6 +105,7 @@ export default {
       inputContent: "",
       fileContent: "",
       fileList: [],
+      fileReadGeneration: 0,
       langs: [
         {
           value: "zh_CN",
@@ -165,8 +166,11 @@ export default {
       return false;
     },
     read(f) {
+      const generation = ++this.fileReadGeneration;
       let rd = new FileReader();
       rd.onload = () => {
+        // Clear or a newer file read makes this result obsolete.
+        if (generation !== this.fileReadGeneration) return;
         //this.readAsArrayBuffer函数内，会回调this.onload函数。在这里处理结果
         let cont = rd.reading({ encode: "UTF-8" });
         console.log(cont);
@@ -176,6 +180,7 @@ export default {
       rd.readAsBinaryString(f);
     },
     clear() {
+      this.fileReadGeneration++;
       console.log("cleared");
       this.fileContent = "";
       this.inputContent = "";
