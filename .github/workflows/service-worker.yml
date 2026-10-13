@@ -1,0 +1,47 @@
+name: Service worker browser regression
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: service-worker-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  online-update-and-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22.14.0"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            tests/service-worker/package-lock.json
+
+      - name: Install application dependencies and build
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+
+      - name: Install browser test dependencies
+        working-directory: tests/service-worker
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Verify online updates and offline operation
+        working-directory: tests/service-worker
+        run: npm test
