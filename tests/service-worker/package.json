@@ -1,0 +1,10 @@
+{
+  "name": "cnfurikana-service-worker-tests",
+  "private": true,
+  "scripts": {
+    "test": "node --test service-worker.test.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.0"
+  }
+}
